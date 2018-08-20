@@ -86,7 +86,7 @@ rowSums(m4[8:10,c(1,3,5)])
 (marks1<-ceiling(rnorm(60,mean = 60,sd = 11)))
 (marks2<-floor(rnorm(60,mean = 65,sd=7)))
 (grades<-sample(c('A','B','C'),size = 60, replace = T))
-(students<-data.frame(Rollno=rollno,Gender=gender,Course=course,Marks1=marks1, Marks2=marks2, Grades=grades, row.names = name))
+(students<-data.frame(Rollno=rollno,Gender=gender,Course=course,Marks1=marks1, Marks2=marks2, Grades=grades, row.names = name, stringsAsFactors = F))
 summary(students)
 students[students$Gender=='M',c("Rollno","Gender","Marks1")] #filtering condition
 barplot(table(students$Course),ylim = c(0,60), col = 3:6) # for pie,barplots you should use table() command, ylim gets you y axis limit
@@ -98,6 +98,44 @@ dim(students)
 head(students)
 tail(students)
 head(students,n=7)
+students[1,"Gender"]<-'F'
+head(students)
+#Average marks scored by each gender in Marks1
+#Gender, Marks1
+aggregate(students$Marks1, by=list(students$Gender),FUN=mean) # in aggregate you can use only one function
+aggregate(students$Marks2, by=list(students$Course),FUN=max)
+aggregate(students$Marks2, by=list(students$Course, students$Grades),FUN=max)
+
+#dplyr
+library(dplyr)
+students %>% group_by(Gender) %>% summarise(mean(Marks1)) #using the %>% piping operator
+students %>% group_by(Gender,Course) %>% summarise(meanmarks1=mean(Marks1),min(Marks2)) %>% arrange(desc(meanmarks1))#piping is simpler than aggregate command
+
+students %>% arrange(desc(Marks1)) %>% filter(Gender=='M') %>% head()
+
+students%>% sample_frac(size = 0.1,replace = F)
+students%>% sample_n(10) %>% arrange(Course)
+students%>% mutate(Total=Marks1+Marks2)
+students%>% group_by(Course,Gender)%>%arrange(Marks1)%>% top_n(n=1)
+#Factor
+students$Gender<-factor(students$Gender)
+summary(students$Gender)
+(students$Course<-factor(students$Course,ordered=T))
+(students$Course<-factor(students$Course,ordered=T,levels = c('FPM','MBA','BBA')))
+summary(students$Grades)
+(students$Grades<-factor(students$Grades,ordered = T, levels = c('C','A','B'))) # median can be found for ordinal data but you don't have mean
+table(students$Grades)
+barplot(table(students$Grades))
+barplot(summary(students$Grades))
+students
+
+#exporting object as csv
+write.csv(students,'./data/iimtrichy.csv')
+students2<-read.csv('./data/iimtrichy.csv')
+head(students2) #get an extra column of row names
+students2<-students2[,-1] #remove the extra column of row names
+head(students2)
+student3<- read.csv(file.choose()) #launch file chooser GUI
 
 #Extra commands
 name[1:10]
