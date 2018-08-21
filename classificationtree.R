@@ -17,4 +17,9 @@ fit
 rpart.plot(fit, extra = 106, cex=.8,nn=T)
 
 printcp(fit)
-
+prunetree2=prune(fit,cp=0.014)
+rpart.plot(prunetree2, cex=0.8,nn=T)
+prunetree2
+library(dplyr)
+(testdata=sample_n(data,2))
+predict(prunetree2,newdata = testdata,type = 'class')
